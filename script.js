@@ -1,4 +1,4 @@
-const url = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes";
+const url = "https://yrmzpdbszroiuhyicnwo.supabase.co";
 
 const apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlybXpwZGJzenJvaXVoeWljbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMTc4OTUsImV4cCI6MjA5MTc5Mzg5NX0.XC4iOw3VhVHYiUtLEXGYVbKBtWzslfHSZaaaCvB3D88";
 
