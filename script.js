@@ -1,10 +1,7 @@
 const url = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes";
 
-const apiKey = "TU_API_KEY_AQUI";
+const apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlybXpwZGJzenJvaXVoeWljbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMTc4OTUsImV4cCI6MjA5MTc5Mzg5NX0.XC4iOw3VhVHYiUtLEXGYVbKBtWzslfHSZaaaCvB3D88";
 
-const url = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes";
-
-const apiKey = "TU_API_KEY_AQUI";
 
 fetch(url, {
   method: "GET",
