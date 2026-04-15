@@ -2,8 +2,6 @@ const url = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes";
 
 const apiKey = "TU_API_KEY_AQUI";
 
-let imagenAbierta = null;
-
 fetch(url, {
   method: "GET",
   headers: {
@@ -24,36 +22,11 @@ fetch(url, {
       if (item.link && item.link !== "") {
         div.innerHTML = `
           ${item.texto}
-          <a href="${item.link}" target="_blank">ver</a>
+          <br>
+          <a href="${item.link}" target="_blank" class="link-btn">→</a>
         `;
       } else {
         div.innerText = item.texto;
-      }
-
-      // IMAGEN
-      let img;
-
-      if (item.imagen && item.imagen !== "") {
-        img = document.createElement("img");
-        img.src = item.imagen;
-        img.className = "mensaje-img";
-        div.appendChild(img);
-
-        div.addEventListener("click", () => {
-
-          if (imagenAbierta && imagenAbierta !== img) {
-            imagenAbierta.style.display = "none";
-          }
-
-          if (img.style.display === "block") {
-            img.style.display = "none";
-            imagenAbierta = null;
-          } else {
-            img.style.display = "block";
-            imagenAbierta = img;
-          }
-
-        });
       }
 
       // POSICIÓN RANDOM
