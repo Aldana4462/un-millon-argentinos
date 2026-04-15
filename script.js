@@ -2,7 +2,9 @@ const url = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes";
 
 const apiKey = "TU_API_KEY_AQUI";
 
-console.log("iniciando fetch...");
+const url = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes";
+
+const apiKey = "TU_API_KEY_AQUI";
 
 fetch(url, {
   method: "GET",
@@ -11,12 +13,8 @@ fetch(url, {
     "Authorization": "Bearer " + apiKey
   }
 })
-  .then(res => {
-    console.log("status:", res.status);
-    return res.json();
-  })
+  .then(res => res.json())
   .then(data => {
-    console.log("data:", data);
 
     data.forEach((item, index) => {
 
@@ -39,7 +37,11 @@ fetch(url, {
       div.style.left = x + "px";
       div.style.top = y + "px";
 
-      div.style.fontSize = (14 + Math.random() * 28) + "px";
+      if (index < 3) {
+        div.style.fontSize = "38px";
+      } else {
+        div.style.fontSize = (14 + Math.random() * 28) + "px";
+      }
 
       document.body.appendChild(div);
 
@@ -47,5 +49,5 @@ fetch(url, {
 
   })
   .catch(err => {
-    console.error("ERROR:", err);
+    console.error("Error:", err);
   });

@@ -38,7 +38,6 @@ body {
   position: absolute;
   color: black;
   max-width: 260px;
-  cursor: default;
   transition: transform 0.2s ease;
 }
 
