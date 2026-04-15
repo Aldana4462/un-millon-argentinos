@@ -1,6 +1,6 @@
 const url = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes";
 
-const apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlybXpwZGJzenJvaXVoeWljbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMTc4OTUsImV4cCI6MjA5MTc5Mzg5NX0.XC4iOw3VhVHYiUtLEXGYVbKBtWzslfHSZaaaCvB3D88";
+const apiKey = "TU_API_KEY_AQUI";
 
 fetch(url, {
   headers: {
@@ -16,11 +16,9 @@ fetch(url, {
       const div = document.createElement("div");
       div.className = "mensaje";
 
-      // texto + link opcional
       if (item.link) {
         div.innerHTML = `
           ${item.texto}
-          <br>
           <a href="${item.link}" target="_blank">ver</a>
         `;
       } else {
@@ -33,12 +31,28 @@ fetch(url, {
       div.style.left = x + "px";
       div.style.top = y + "px";
 
-      div.style.fontSize = (12 + Math.random() * 12) + "px";
-      div.style.opacity = 0.4 + Math.random() * 0.6;
+      // jerarquía visual
+      if (index < 3) {
+        div.style.fontSize = "38px";
+        div.style.opacity = "1";
+      } else {
+        div.style.fontSize = (14 + Math.random() * 28) + "px";
+        div.style.opacity = 0.4 + Math.random() * 0.6;
+      }
+
       div.style.transform = `rotate(${Math.random() * 4 - 2}deg)`;
 
       document.body.appendChild(div);
 
+      // animación entrada
+      div.style.opacity = 0;
+
+      setTimeout(() => {
+        div.style.transition = "opacity 1s ease";
+        div.style.opacity = 1;
+      }, Math.random() * 2000);
+
+      // movimiento suave
       let angle = Math.random() * Math.PI * 2;
 
       function mover() {
