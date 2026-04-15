@@ -1,52 +1,81 @@
 const url = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes";
+const apiKey = "TU_API_KEY_AQUI";
 
-const apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlybXpwZGJzenJvaXVoeWljbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMTc4OTUsImV4cCI6MjA5MTc5Mzg5NX0.XC4iOw3VhVHYiUtLEXGYVbKBtWzslfHSZaaaCvB3D88";
+// 👉 cantidad de puntos vacíos
+const TOTAL_PUNTOS = 400;
 
+let puntosLibres = [];
 
+// 1. CREAR PUNTOS VACÍOS
+for (let i = 0; i < TOTAL_PUNTOS; i++) {
+
+  const punto = document.createElement("div");
+  punto.className = "punto vacio";
+
+  let x = Math.random() * window.innerWidth;
+  let y = Math.random() * window.innerHeight;
+
+  punto.style.left = x + "px";
+  punto.style.top = y + "px";
+
+  document.body.appendChild(punto);
+
+  puntosLibres.push(punto);
+}
+
+// 2. TRAER DATOS DE SUPABASE
 fetch(url, {
-  method: "GET",
   headers: {
     "apikey": apiKey,
     "Authorization": "Bearer " + apiKey
   }
 })
-  .then(res => res.json())
-  .then(data => {
+.then(res => res.json())
+.then(data => {
 
-    data.forEach((item, index) => {
+  let popupActual = null;
 
-      const div = document.createElement("div");
-      div.className = "mensaje";
+  data.forEach((item, index) => {
 
-      if (item.link && item.link !== "") {
-        div.innerHTML = `
-          ${item.texto}
+    setTimeout(() => {
+
+      // agarrar un punto libre
+      const punto = puntosLibres[index];
+      if (!punto) return;
+
+      // convertirlo en ocupado
+      punto.classList.remove("vacio");
+      punto.classList.add("ocupado");
+
+      punto.style.background = item.color || "#000";
+
+      // CLICK → mostrar info
+      punto.addEventListener("click", () => {
+
+        if (popupActual) popupActual.remove();
+
+        const popup = document.createElement("div");
+        popup.className = "popup";
+
+        popup.innerHTML = `
+          ${item.nombre || ""}
           <br>
-          <a href="${item.link}" target="_blank" class="link-btn">→</a>
+          ${item.texto || ""}
+          <br>
+          ${item.link ? `<a href="${item.link}" target="_blank" style="color:white;">→</a>` : ""}
         `;
-      } else {
-        div.innerText = item.texto;
-      }
 
-      const margen = 120;
+        popup.style.left = punto.style.left;
+        popup.style.top = punto.style.top;
 
-let x = Math.random() * (window.innerWidth - margen * 2) + margen;
-let y = Math.random() * (window.innerHeight - margen * 2) + margen;
+        document.body.appendChild(popup);
 
-      div.style.left = x + "px";
-      div.style.top = y + "px";
+        popupActual = popup;
 
-      if (index < 3) {
-        div.style.fontSize = "38px";
-      } else {
-        div.style.fontSize = (14 + Math.random() * 28) + "px";
-      }
+      });
 
-      document.body.appendChild(div);
+    }, index * 50); // aparición progresiva
 
-    });
-
-  })
-  .catch(err => {
-    console.error("Error:", err);
   });
+
+});

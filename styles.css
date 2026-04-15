@@ -2,9 +2,10 @@ body {
   margin: 0;
   overflow: hidden;
   font-family: Arial, sans-serif;
-  background: white;
+  background: #f8f7f3;
 }
 
+/* texto */
 .titulo {
   position: fixed;
   top: 20px;
@@ -16,9 +17,8 @@ body {
   position: fixed;
   top: 60px;
   left: 20px;
-  max-width: 280px;
-  font-size: 15px;
-  line-height: 1.4;
+  max-width: 260px;
+  font-size: 14px;
 }
 
 .boton {
@@ -27,38 +27,42 @@ body {
   right: 20px;
   background: black;
   color: white;
-  padding: 14px 22px;
+  padding: 12px 18px;
   text-decoration: none;
-  font-size: 15px;
 }
 
-/* MENSAJES */
+/* puntos */
 
-.mensaje {
+.punto {
   position: absolute;
-  color: black;
-  max-width: 260px;
-  transition: transform 0.2s ease;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  transition: transform 0.2s;
 }
 
-.mensaje:hover {
-  transform: scale(1.1);
-  z-index: 999;
+/* vacíos */
+.punto.vacio {
+  background: #d9d6cd;
+  opacity: 0.6;
 }
 
-/* BOTÓN LINK */
-
-.link-btn {
-  display: inline-block;
-  margin-top: 4px;
-  padding: 2px 6px;
-  font-size: 11px;
-  border: 1px solid black;
-  text-decoration: none;
-  color: black;
+/* ocupados */
+.punto.ocupado {
+  opacity: 1;
+  cursor: pointer;
 }
 
-.link-btn:hover {
+.punto:hover {
+  transform: scale(2);
+}
+
+/* popup */
+.popup {
+  position: absolute;
   background: black;
   color: white;
+  padding: 6px;
+  font-size: 12px;
+  max-width: 180px;
 }
