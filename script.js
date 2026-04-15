@@ -1,8 +1,8 @@
 const url = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes";
 
-const apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlybXpwZGJzenJvaXVoeWljbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMTc4OTUsImV4cCI6MjA5MTc5Mzg5NX0.XC4iOw3VhVHYiUtLEXGYVbKBtWzslfHSZaaaCvB3D88";
+const apiKey = "TU_API_KEY_AQUI";
 
-console.log("Conectando a Supabase...");
+let imagenAbierta = null;
 
 fetch(url, {
   method: "GET",
@@ -12,27 +12,15 @@ fetch(url, {
     "Content-Type": "application/json"
   }
 })
-  .then(res => {
-    if (!res.ok) {
-      console.error("Error en la respuesta:", res.status);
-      throw new Error("Error en fetch");
-    }
-    return res.json();
-  })
+  .then(res => res.json())
   .then(data => {
-    console.log("Datos recibidos:", data);
-
-    if (!data || data.length === 0) {
-      console.warn("No hay mensajes en la base");
-      return;
-    }
 
     data.forEach((item, index) => {
 
       const div = document.createElement("div");
       div.className = "mensaje";
 
-      // contenido
+      // TEXTO + LINK
       if (item.link && item.link !== "") {
         div.innerHTML = `
           ${item.texto}
@@ -42,14 +30,40 @@ fetch(url, {
         div.innerText = item.texto;
       }
 
-      // posición random
+      // IMAGEN
+      let img;
+
+      if (item.imagen && item.imagen !== "") {
+        img = document.createElement("img");
+        img.src = item.imagen;
+        img.className = "mensaje-img";
+        div.appendChild(img);
+
+        div.addEventListener("click", () => {
+
+          if (imagenAbierta && imagenAbierta !== img) {
+            imagenAbierta.style.display = "none";
+          }
+
+          if (img.style.display === "block") {
+            img.style.display = "none";
+            imagenAbierta = null;
+          } else {
+            img.style.display = "block";
+            imagenAbierta = img;
+          }
+
+        });
+      }
+
+      // POSICIÓN RANDOM
       let x = Math.random() * window.innerWidth;
       let y = Math.random() * window.innerHeight;
 
       div.style.left = x + "px";
       div.style.top = y + "px";
 
-      // jerarquía visual
+      // JERARQUÍA
       if (index < 3) {
         div.style.fontSize = "38px";
         div.style.opacity = "1";
@@ -62,7 +76,7 @@ fetch(url, {
 
       document.body.appendChild(div);
 
-      // animación de entrada
+      // ANIMACIÓN ENTRADA
       div.style.opacity = 0;
 
       setTimeout(() => {
@@ -70,7 +84,7 @@ fetch(url, {
         div.style.opacity = (index < 3) ? 1 : (0.4 + Math.random() * 0.6);
       }, Math.random() * 2000);
 
-      // movimiento suave
+      // MOVIMIENTO SUAVE
       let angle = Math.random() * Math.PI * 2;
 
       function mover() {
@@ -91,5 +105,5 @@ fetch(url, {
 
   })
   .catch(err => {
-    console.error("ERROR GENERAL:", err);
+    console.error("Error:", err);
   });

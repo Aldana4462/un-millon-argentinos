@@ -37,13 +37,13 @@ body {
 .mensaje {
   position: absolute;
   color: black;
-  white-space: nowrap;
   max-width: 260px;
+  cursor: pointer;
   transition: transform 0.2s ease;
 }
 
 .mensaje:hover {
-  transform: scale(1.2);
+  transform: scale(1.1);
   z-index: 999;
 }
 
@@ -53,4 +53,13 @@ body {
   font-size: 12px;
   color: black;
   text-decoration: underline;
+}
+
+/* IMAGEN */
+
+.mensaje-img {
+  display: none;
+  margin-top: 6px;
+  width: 180px;
+  max-width: 200px;
 }
