@@ -38,7 +38,7 @@ body {
   position: absolute;
   color: black;
   max-width: 260px;
-  cursor: pointer;
+  cursor: default;
   transition: transform 0.2s ease;
 }
 
@@ -47,19 +47,19 @@ body {
   z-index: 999;
 }
 
-.mensaje a {
-  display: block;
+/* BOTÓN LINK */
+
+.link-btn {
+  display: inline-block;
   margin-top: 4px;
-  font-size: 12px;
+  padding: 2px 6px;
+  font-size: 11px;
+  border: 1px solid black;
+  text-decoration: none;
   color: black;
-  text-decoration: underline;
 }
 
-/* IMAGEN */
-
-.mensaje-img {
-  display: none;
-  margin-top: 6px;
-  width: 180px;
-  max-width: 200px;
+.link-btn:hover {
+  background: black;
+  color: white;
 }
