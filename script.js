@@ -28,8 +28,10 @@ fetch(url, {
         div.innerText = item.texto;
       }
 
-      let x = Math.random() * window.innerWidth;
-      let y = Math.random() * window.innerHeight;
+      const margen = 120;
+
+let x = Math.random() * (window.innerWidth - margen * 2) + margen;
+let y = Math.random() * (window.innerHeight - margen * 2) + margen;
 
       div.style.left = x + "px";
       div.style.top = y + "px";
