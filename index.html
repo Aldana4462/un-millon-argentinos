@@ -1,24 +1,65 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Un millón de argentinos</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  background: white;
+}
 
-<h1 class="titulo">UN MILLÓN DE ARGENTINOS</h1>
+.titulo {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  font-size: 18px;
+}
 
-<p class="intro">
-Un millón de argentinos.  
-Un lugar para decir algo y quedar.
-</p>
+.intro {
+  position: fixed;
+  top: 60px;
+  left: 20px;
+  max-width: 280px;
+  font-size: 15px;
+  line-height: 1.4;
+}
 
-<a href="https://mpago.la/xxxxx" target="_blank" class="boton">
-  Dejar mi mensaje ($1000)
-</a>
+.boton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: black;
+  color: white;
+  padding: 14px 22px;
+  text-decoration: none;
+  font-size: 15px;
+}
 
-<script src="script.js"></script>
+/* MENSAJES */
 
-</body>
-</html>
+.mensaje {
+  position: absolute;
+  color: black;
+  max-width: 260px;
+  cursor: default;
+  transition: transform 0.2s ease;
+}
+
+.mensaje:hover {
+  transform: scale(1.1);
+  z-index: 999;
+}
+
+/* BOTÓN LINK */
+
+.link-btn {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  border: 1px solid black;
+  text-decoration: none;
+  color: black;
+}
+
+.link-btn:hover {
+  background: black;
+  color: white;
+}
