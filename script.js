@@ -7,6 +7,8 @@ const margenBottom = 100;
 const margenLateral = 50;
 const VELOCIDAD_MAX = 0.35;
 const REFRESH_MS = 5000;
+const PROFUNDIDAD_MIN = 0.55;
+const PROFUNDIDAD_MAX = 1.65;
 
 const puntos = [];
 let popupActual = null;
@@ -45,8 +47,15 @@ function crearPuntosVacios() {
       y,
       vx: (Math.random() * 2 - 1) * VELOCIDAD_MAX,
       vy: (Math.random() * 2 - 1) * VELOCIDAD_MAX,
-      pausado: false
+      pausado: false,
+      profundidad: Math.random() * (PROFUNDIDAD_MAX - PROFUNDIDAD_MIN) + PROFUNDIDAD_MIN,
+      fase: Math.random() * Math.PI * 2
     };
+
+    const tam = 12 + puntoAnimado.profundidad * 8;
+    punto.style.width = tam + "px";
+    punto.style.height = tam + "px";
+    punto.style.fontSize = Math.max(8, tam * 0.46) + "px";
 
     punto.addEventListener("mouseenter", () => {
       if (!punto.classList.contains("ocupado")) return;
@@ -66,12 +75,13 @@ function animarPuntos() {
   const maxX = window.innerWidth - margenLateral;
   const minY = margenTop;
   const maxY = window.innerHeight - margenBottom;
+  const tiempo = performance.now();
 
   puntos.forEach((punto) => {
     if (punto.pausado) return;
 
-    punto.x += punto.vx;
-    punto.y += punto.vy;
+    punto.x += punto.vx * punto.profundidad;
+    punto.y += punto.vy * punto.profundidad;
 
     if (punto.x <= minX || punto.x >= maxX) punto.vx *= -1;
     if (punto.y <= minY || punto.y >= maxY) punto.vy *= -1;
@@ -79,8 +89,11 @@ function animarPuntos() {
     punto.x = Math.min(Math.max(punto.x, minX), maxX);
     punto.y = Math.min(Math.max(punto.y, minY), maxY);
 
-    punto.el.style.left = punto.x + "px";
-    punto.el.style.top = punto.y + "px";
+    const pulsoX = Math.sin(tiempo * 0.0012 + punto.fase) * punto.profundidad * 0.8;
+    const pulsoY = Math.cos(tiempo * 0.001 + punto.fase) * punto.profundidad * 0.8;
+
+    punto.el.style.left = (punto.x + pulsoX) + "px";
+    punto.el.style.top = (punto.y + pulsoY) + "px";
   });
 
   requestAnimationFrame(animarPuntos);
