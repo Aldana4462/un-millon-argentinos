@@ -1,31 +1,34 @@
-const url = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes?select=id,nombre,texto,link,color,created_at&order=id.asc";
-const apiKey = "TU_API_KEY_AQUI";
+ url = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes?select=id,nombre,texto,link,color,created_at&order=id.asc";
+ apiKey = "TeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlybXpwZGJzenJvaXVoeWljbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMTc4OTUsImV4cCI6MjA5MTc5Mzg5NX0.XC4iOw3VhVHYiUtLEXGYVbKBtWzslfHSZaaaCvB3D88";
 
-const TOTAL_PUNTOS = 400;
-let margenTop = 140;
-const margenBottom = 20;
-const margenLateral = 50;
-const VELOCIDAD_MAX = 0.08;
-const REFRESH_MS = 5000;
-const ROTACION_MS = 9000;
-const PROFUNDIDAD_MIN = 0.8;
-const PROFUNDIDAD_MAX = 1.2;
+ TOTAL_PUNTOS = 400;
+ margenTop = 140;
+ margenBottom = 20;
+ margenLateral = 50;
+ VELOCIDAD_MAX = 0.08;
+ REFRESH_MS = 5000;
+ ROTACION_MS = 9000;
+ PROFUNDIDAD_MIN = 0.8;
+ PROFUNDIDAD_MAX = 1.2;
 
-const puntos = [];
-let mensajes = [];
-let offsetLote = 0;
-let popupActual = null;
-let puntoActivo = null;
+ puntos = [];
+ mensajes = [];
+ offsetLote = 0;
+ popupActual = null;
+ puntoActivo = null;
+ fetchEnCurso = false;
+ ultimoFetchMs = 0;
+ ultimaRotacionMs = 0;
 
-function actualizarMargenTop() {
-  const header = document.querySelector(".header");
-  const altoHeader = header ? header.offsetHeight : 120;
+ actualizarMargenTop() {
+   header = document.querySelector(".header");
+   altoHeader = header ? header.offsetHeight : 120;
   margenTop = altoHeader + 20;
 }
 
-function obtenerPosicionAleatoria() {
-  const anchoUtil = Math.max(window.innerWidth - margenLateral * 2, 1);
-  const altoUtil = Math.max(window.innerHeight - margenTop - margenBottom, 1);
+ obtenerPosicionAleatoria() {
+   anchoUtil = Math.max(window.innerWidth - margenLateral * 2, 1);
+   altoUtil = Math.max(window.innerHeight - margenTop - margenBottom, 1);
 
   return {
     x: Math.random() * anchoUtil + margenLateral,
@@ -33,9 +36,9 @@ function obtenerPosicionAleatoria() {
   };
 }
 
-function resetPuntoAnimacion(punto, desdeBorde = false) {
-  const ancho = window.innerWidth;
-  const alto = window.innerHeight;
+ resetPuntoAnimacion(punto, desdeBorde = false) {
+   ancho = window.innerWidth;
+   alto = window.innerHeight;
 
   if (desdeBorde) {
     if (Math.random() > 0.5) {
@@ -46,7 +49,7 @@ function resetPuntoAnimacion(punto, desdeBorde = false) {
       punto.y = Math.random() > 0.5 ? margenTop - 20 : alto + 20;
     }
   } else {
-    const pos = obtenerPosicionAleatoria();
+     pos = obtenerPosicionAleatoria();
     punto.x = pos.x;
     punto.y = pos.y;
   }
@@ -58,16 +61,16 @@ function resetPuntoAnimacion(punto, desdeBorde = false) {
   punto.saliendoAtras = false;
 }
 
-function crearPuntosVacios() {
-  for (let i = 0; i < TOTAL_PUNTOS; i++) {
-    const punto = document.createElement("div");
+ crearPuntosVacios() {
+  for ( i = 0; i < TOTAL_PUNTOS; i++) {
+     punto = document.createElement("div");
     punto.className = "punto vacio";
 
     document.body.appendChild(punto);
 
-    const { x, y } = obtenerPosicionAleatoria();
+     { x, y } = obtenerPosicionAleatoria();
 
-    const puntoAnimado = {
+     puntoAnimado = {
       el: punto,
       x,
       y,
@@ -97,16 +100,16 @@ function crearPuntosVacios() {
   }
 }
 
-function animarPuntos() {
-  const ahora = performance.now();
+ animarPuntos() {
+   ahora = performance.now();
   if (!animarPuntos.ultimo) animarPuntos.ultimo = ahora;
-  const delta = Math.min((ahora - animarPuntos.ultimo) / 1000, 0.05);
+   delta = Math.min((ahora - animarPuntos.ultimo) / 1000, 0.05);
   animarPuntos.ultimo = ahora;
 
-  const minX = -28;
-  const maxX = window.innerWidth + 28;
-  const minY = margenTop - 28;
-  const maxY = window.innerHeight + 28;
+   minX = -28;
+   maxX = window.innerWidth + 28;
+   minY = margenTop - 28;
+   maxY = window.innerHeight + 28;
 
   puntos.forEach((punto) => {
     if (!punto.pausado) {
@@ -135,21 +138,34 @@ function animarPuntos() {
       punto.entrada = Math.min(1, punto.entrada + delta * 2);
     }
 
-    const easing = 1 - Math.pow(1 - punto.entrada, 2);
-    const scale = punto.scale * (0.6 + easing * 0.4);
-    const opacity = punto.opacity * easing;
+     easing = 1 - Math.pow(1 - punto.entrada, 2);
+     scale = punto.scale * (0.6 + easing * 0.4);
+     opacity = punto.opacity * easing;
 
     punto.el.style.transform = `translate(${punto.x}px, ${punto.y}px) scale(${scale})`;
     punto.el.style.opacity = opacity;
   });
 
+  if (!ultimoFetchMs) ultimoFetchMs = ahora;
+  if (!ultimaRotacionMs) ultimaRotacionMs = ahora;
+
+  if (ahora - ultimoFetchMs > REFRESH_MS) {
+    ultimoFetchMs = ahora;
+    cargarMensajes();
+  }
+
+  if (ahora - ultimaRotacionMs > ROTACION_MS) {
+    ultimaRotacionMs = ahora;
+    rotarLote();
+  }
+
   requestAnimationFrame(animarPuntos);
 }
 
-function mostrarPopup(punto, item) {
+ mostrarPopup(punto, item) {
   if (popupActual) popupActual.remove();
 
-  const popup = document.createElement("div");
+   popup = document.createElement("div");
   popup.className = "popup";
 
   popup.innerHTML = `
@@ -165,11 +181,11 @@ function mostrarPopup(punto, item) {
   popupActual = popup;
 }
 
-function normalizarColor(color) {
+ normalizarColor(color) {
   return /^#([0-9A-F]{3}){1,2}$/i.test(color) ? color : "#000";
 }
 
-function aplicarItemAPunto(punto, item) {
+ aplicarItemAPunto(punto, item) {
   if (!item) return;
 
   punto.el.classList.remove("vacio");
@@ -181,44 +197,49 @@ function aplicarItemAPunto(punto, item) {
   punto.el.onclick = () => mostrarPopup(punto, item);
 }
 
-function obtenerLoteActual() {
+ obtenerLoteActual() {
   return mensajes.slice(offsetLote, offsetLote + TOTAL_PUNTOS);
 }
 
-function sincronizarPuntos(data) {
+ sincronizarPuntos(data) {
   puntos.forEach((punto, i) => {
     aplicarItemAPunto(punto, data[i]);
   });
 }
 
-function rotarLote() {
+ rotarLote() {
   if (mensajes.length <= TOTAL_PUNTOS) return;
 
   offsetLote = (offsetLote + TOTAL_PUNTOS) % mensajes.length;
   sincronizarPuntos(obtenerLoteActual());
 }
 
-function cargarMensajes() {
+ cargarMensajes() {
+  if (fetchEnCurso) return;
+  fetchEnCurso = true;
+
   fetch(url, {
     headers: {
       apikey: apiKey,
       Authorization: `Bearer ${apiKey}`
     }
   })
-  .catch(error => {
-    console.error("Error cargando mensajes:", error.message);
-    mensajes = [];
-    offsetLote = 0;
-    sincronizarPuntos([]);
-  });
+    .then(r => r.json())
+    .then(data => {
+      mensajes = data || [];
+      offsetLote = 0;
+      sincronizarPuntos(obtenerLoteActual());
+    })
+    .catch(console.error)
+    .finally(() => {
+      fetchEnCurso = false;
+    });
 }
 
 actualizarMargenTop();
 crearPuntosVacios();
 animarPuntos();
 cargarMensajes();
-setInterval(cargarMensajes, REFRESH_MS);
-setInterval(rotarLote, ROTACION_MS);
 
 window.addEventListener("resize", actualizarMargenTop);
 
