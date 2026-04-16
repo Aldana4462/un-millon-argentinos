@@ -78,6 +78,23 @@ body {
   line-height: 1;
 }
 
+.punto.saliendo-izq {
+  opacity: 0;
+  transform: translateX(-24px) scale(0.88);
+  filter: blur(0.4px);
+}
+
+.punto.saliendo-der {
+  opacity: 0;
+  transform: translateX(24px) scale(0.88);
+  filter: blur(0.4px);
+}
+
+.punto.entrando {
+  opacity: 0;
+  transform: scale(0.84);
+}
+
 /* vacíos */
 .punto.vacio {
   background: #d9d6cd;
