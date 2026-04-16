@@ -112,8 +112,8 @@
 
   <script>
     const SUPABASE_URL = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes";
-    const API_KEY = "TU_API_KEY_AQUI"; // completá acá
-    const AUTH_TOKEN = "TU_BEARER_AQUI"; // completá acá
+    const API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlybXpwZGJzenJvaXVoeWljbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMTc4OTUsImV4cCI6MjA5MTc5Mzg5NX0.XC4iOw3VhVHYiUtLEXGYVbKBtWzslfHSZaaaCvB3D88";
+    const AUTH_TOKEN = API_KEY;
 
     const form = document.getElementById("puntoForm");
     const msg = document.getElementById("msg");
@@ -165,7 +165,8 @@
         });
 
         if (!res.ok) {
-          throw new Error("Error " + res.status);
+          const detalle = await res.text();
+          throw new Error("Error " + res.status + " " + detalle);
         }
 
         setMsg("Listo, ya ocupaste tu lugar", "ok");
@@ -175,6 +176,7 @@
         // Opcional:
         // setTimeout(() => { window.location.href = "index.html"; }, 1500);
       } catch (error) {
+        console.error("Error guardando en Supabase:", error.message);
         setMsg("No se pudo guardar. Probá de nuevo.", "error");
       }
     });
