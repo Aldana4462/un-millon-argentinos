@@ -98,6 +98,7 @@
       line-height: 1.35;
     }
 
+<<<<<<< HEAD
     .contador {
       margin-top: 8px;
       font-size: 12px;
@@ -143,6 +144,8 @@
       background: #000;
     }
 
+=======
+>>>>>>> parent of 83b3f81 (Muestra contador de caracteres sobre limite 300 en form)
     button {
       border: 0;
       background: #000;
@@ -186,7 +189,6 @@
       <div>
         <label for="texto">Texto</label>
         <textarea id="texto" name="texto" maxlength="300" required></textarea>
-        <div id="contadorTexto" class="contador">0 / 300 caracteres</div>
       </div>
 
       <div>
@@ -219,11 +221,14 @@
 
     const form = document.getElementById("puntoForm");
     const textoInput = document.getElementById("texto");
+<<<<<<< HEAD
     const contadorTexto = document.getElementById("contadorTexto");
     const mapaColor = document.getElementById("mapaColor");
     const ctxMapaColor = mapaColor.getContext("2d");
     const previewDot = document.getElementById("previewDot");
     const previewText = document.getElementById("previewText");
+=======
+>>>>>>> parent of 83b3f81 (Muestra contador de caracteres sobre limite 300 en form)
     const msg = document.getElementById("msg");
     let colorSeleccionado = "#000000";
 
@@ -241,6 +246,7 @@
       textoInput.style.height = textoInput.scrollHeight + "px";
     }
 
+<<<<<<< HEAD
     function actualizarContador() {
       contadorTexto.textContent = textoInput.value.length + " / 300 caracteres";
     }
@@ -316,6 +322,10 @@
     ajustarAltoTextarea();
     actualizarContador();
     actualizarPreview();
+=======
+    textoInput.addEventListener("input", ajustarAltoTextarea);
+    ajustarAltoTextarea();
+>>>>>>> parent of 83b3f81 (Muestra contador de caracteres sobre limite 300 en form)
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -363,8 +373,11 @@
         form.reset();
         colorSeleccionado = "#000000";
         ajustarAltoTextarea();
+<<<<<<< HEAD
         actualizarContador();
         actualizarPreview();
+=======
+>>>>>>> parent of 83b3f81 (Muestra contador de caracteres sobre limite 300 en form)
 
         // Opcional:
         // setTimeout(() => { window.location.href = "index.html"; }, 1500);
