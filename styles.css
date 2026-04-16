@@ -3,6 +3,7 @@ body {
   overflow: hidden;
   font-family: Arial, sans-serif;
   background: #f8f7f3;
+  caret-color: transparent;
 }
 
 /* capa de interfaz (texto + botón) */
@@ -49,6 +50,7 @@ body {
   height: 6px;
   border-radius: 50%;
   transition: transform 0.2s;
+  user-select: none;
 }
 
 /* vacíos */
@@ -76,4 +78,9 @@ body {
   padding: 6px;
   font-size: 12px;
   max-width: 180px;
+  user-select: none;
+}
+
+.popup a {
+  user-select: text;
 }

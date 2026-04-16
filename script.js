@@ -91,6 +91,9 @@ function mostrarPopup(punto, item) {
   if (item.nombre) bloques.push(`<strong>${item.nombre}</strong>`);
   if (item.texto) bloques.push(`<span>${item.texto}</span>`);
   if (item.link) bloques.push(`<a href="${item.link}" target="_blank" style="color:white;">ver link</a>`);
+  if (bloques.length === 0) {
+    return;
+  }
 
   popup.innerHTML = bloques.join("<br>");
   popup.addEventListener("click", (event) => event.stopPropagation());
