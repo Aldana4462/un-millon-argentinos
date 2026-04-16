@@ -16,6 +16,9 @@ let mensajes = [];
 let offsetLote = 0;
 let popupActual = null;
 let puntoActivo = null;
+let fetchEnCurso = false;
+let ultimoFetchMs = 0;
+let ultimaRotacionMs = 0;
 
 function actualizarMargenTop() {
   const header = document.querySelector(".header");
@@ -150,6 +153,19 @@ function animarPuntos() {
     punto.el.style.opacity = opacityFinal;
   });
 
+  if (!ultimoFetchMs) ultimoFetchMs = ahora;
+  if (!ultimaRotacionMs) ultimaRotacionMs = ahora;
+
+  if (ahora - ultimoFetchMs >= REFRESH_MS) {
+    ultimoFetchMs = ahora;
+    cargarMensajes();
+  }
+
+  if (ahora - ultimaRotacionMs >= ROTACION_MS) {
+    ultimaRotacionMs = ahora;
+    rotarLote();
+  }
+
   requestAnimationFrame(animarPuntos);
 }
 
@@ -244,6 +260,9 @@ function rotarLote() {
 }
 
 function cargarMensajes() {
+  if (fetchEnCurso) return;
+  fetchEnCurso = true;
+
   fetch(url, {
     headers: {
       "apikey": apiKey,
@@ -269,6 +288,9 @@ function cargarMensajes() {
     mensajes = [];
     offsetLote = 0;
     sincronizarPuntos([]);
+  })
+  .finally(() => {
+    fetchEnCurso = false;
   });
 }
 
@@ -276,8 +298,6 @@ actualizarMargenTop();
 crearPuntosVacios();
 animarPuntos();
 cargarMensajes();
-setInterval(cargarMensajes, REFRESH_MS);
-setInterval(rotarLote, ROTACION_MS);
 
 window.addEventListener("resize", actualizarMargenTop);
 
