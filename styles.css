@@ -97,6 +97,7 @@ body {
   line-height: 1;
   will-change: transform, opacity;
 }
+<<<<<<< HEAD
 
 /* Variación visual ligera para que no todos se vean iguales */
 .punto:nth-of-type(3n) {
@@ -113,6 +114,8 @@ body {
   opacity: 0.62;
 }
 
+=======
+>>>>>>> parent of 0fe733a (Rota lotes de 400 puntos con transicion de salida/entrada)
 
 /* vacíos */
 .punto.vacio {
