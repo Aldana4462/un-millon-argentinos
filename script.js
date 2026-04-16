@@ -3,8 +3,8 @@ const apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 
 const TOTAL_PUNTOS = 400;
 let margenTop = 140;
-const margenBottom = 0; // Cambiado a 0 para llegar al borde inferior
-const margenLateral = 0; // Cambiado a 0 para ocupar todo el ancho
+const margenBottom = 20;
+const margenLateral = 50;
 const VELOCIDAD_MAX = 0.08;
 const REFRESH_MS = 5000;
 const ROTACION_MS = 9000;
@@ -23,8 +23,7 @@ let ultimaRotacionMs = 0;
 function actualizarMargenTop() {
   const header = document.querySelector(".header");
   const altoHeader = header ? header.offsetHeight : 120;
-  // Seteamos el margen justo al alto del header para que no se superpongan con el texto
-  margenTop = altoHeader; 
+  margenTop = altoHeader + 20;
 }
 
 function obtenerPosicionAleatoria() {
@@ -118,8 +117,8 @@ function animarPuntos() {
     if (!punto.pausado) {
       if (punto.saliendoAtras) {
         punto.z = Math.min(1, punto.z + delta * 0.45);
-        punto.scale = 1 - punto.z * 0.7;
-        punto.opacity = 1 - punto.z;
+        punto.scale = 1 - punto.z * 0.7;     // 1 -> 0.3
+        punto.opacity = 1 - punto.z;         // 1 -> 0
 
         if (punto.opacity <= 0.04) {
           resetPuntoAnimacion(punto, false);
@@ -145,7 +144,7 @@ function animarPuntos() {
     }
 
     const easingEntrada = 1 - Math.pow(1 - punto.entrada, 2);
-    const scaleEntrada = 0.6 + easingEntrada * 0.4;
+    const scaleEntrada = 0.6 + easingEntrada * 0.4; // 0.6 -> 1
     const opacityEntrada = easingEntrada;
     const scaleFinal = punto.scale * scaleEntrada;
     const opacityFinal = Math.max(0, Math.min(1, punto.opacity * opacityEntrada));
@@ -295,7 +294,6 @@ function cargarMensajes() {
   });
 }
 
-// Inicialización
 actualizarMargenTop();
 crearPuntosVacios();
 animarPuntos();

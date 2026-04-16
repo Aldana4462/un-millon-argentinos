@@ -1,107 +1,42 @@
 body {
   margin: 0;
-  /* Eliminamos el padding que empujaba todo hacia abajo */
   overflow: hidden;
   font-family: Arial, sans-serif;
   background: #f8f7f3;
-  caret-color: transparent;
 }
 
-.header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 20;
-  display: flex;
-  justify-content: space-between;
-  /* Esto asegura que el botón esté "arriba" a la derecha */
-  align-items: flex-start; 
-  gap: 20px;
-  padding: 18px 20px;
-  box-sizing: border-box;
-  background: #f8f7f3;
-  border-bottom: 1px solid #e7e2d8;
-}
-
-.header-left {
-  max-width: 560px;
-}
-
-.header-right {
-  display: grid;
-  justify-items: end;
-  gap: 10px;
-  /* Asegura que el contenedor de la derecha no baje */
-  align-self: flex-start; 
-}
-
+/* texto */
 .titulo {
-  margin: 0 0 4px;
-  font-size: 28px;
-  line-height: 1;
-  letter-spacing: 0.5px;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  font-size: 18px;
 }
 
-.subtitulo {
-  margin: 0;
-  font-size: 15px;
-  color: #555;
+.intro {
+  position: fixed;
+  top: 60px;
+  left: 20px;
+  max-width: 260px;
+  font-size: 14px;
 }
 
 .boton {
-  display: inline-block;
-  background: #009ee3;
-  color: #fff;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: black;
+  color: white;
+  padding: 12px 18px;
   text-decoration: none;
-  padding: 12px 20px;
-  border-radius: 6px;
-  font-weight: 700;
-  font-size: 15px;
-  transition: background 0.2s;
-  white-space: nowrap;
 }
 
-.test-link {
-  font-size: 12px;
-  color: #888;
-  text-decoration: underline;
-}
+/* puntos */
 
-/* --- PUNTOS --- */
 .punto {
   position: absolute;
-  /* IMPORTANTE: Los puntos deben nacer en el 0,0 */
-  top: 0;
-  left: 0; 
-  z-index: 1;
-  width: 14px;
-  height: 14px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  will-change: transform, opacity;
-}
-
-.punto.vacio { background: #d9d6cd; opacity: 0.5; }
-.punto.ocupado { cursor: pointer; }
-
-/* --- CELULAR --- */
-@media (max-width: 600px) {
-  .header {
-    /* Mantenemos el botón arriba a la derecha incluso en móvil */
-    padding: 12px 15px;
-  }
-  
-  .titulo {
-    font-size: 18px;
-    max-width: 160px; /* Evita que pise el botón */
-  }
-
-  .subtitulo {
-    font-size: 12px;
-  }
-
-  .boton {
-    padding: 8px 12px;
-    font-size: 13px;
-  }
+  transition: transform 0.2s;
 }
