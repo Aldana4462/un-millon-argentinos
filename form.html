@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Completar datos | Un millón de argentinos</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #f8f7f3;
+      font-family: Arial, sans-serif;
+      color: #111;
+    }
+
+    .card {
+      width: min(92vw, 460px);
+      background: #fff;
+      border: 1px solid #ddd8cd;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    p {
+      margin: 0 0 20px;
+      color: #444;
+      font-size: 14px;
+    }
+
+    form {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid #cfc9bb;
+      background: #fff;
+      padding: 10px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    input[type="color"] {
+      padding: 4px;
+      height: 42px;
+      cursor: pointer;
+    }
+
+    button {
+      border: 0;
+      background: #000;
+      color: #fff;
+      padding: 12px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .msg {
+      margin-top: 14px;
+      font-size: 13px;
+      min-height: 18px;
+    }
+
+    .ok { color: #0b7f2c; }
+    .error { color: #b40e0e; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Ya casi estás</h1>
+    <p>Completá tus datos para ocupar tu punto.</p>
+
+    <form id="puntoForm" novalidate>
+      <div>
+        <label for="nombre">Nombre</label>
+        <input id="nombre" name="nombre" type="text" maxlength="30" required>
+      </div>
+
+      <div>
+        <label for="texto">Texto</label>
+        <input id="texto" name="texto" type="text" maxlength="80" required>
+      </div>
+
+      <div>
+        <label for="link">Link (opcional)</label>
+        <input id="link" name="link" type="text" placeholder="https://...">
+      </div>
+
+      <div>
+        <label for="color">Color</label>
+        <input id="color" name="color" type="color" value="#000000" required>
+      </div>
+
+      <button type="submit">Ocupar mi punto</button>
+    </form>
+
+    <div id="msg" class="msg" aria-live="polite"></div>
+  </main>
+
+  <script>
+    const SUPABASE_URL = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes";
+    const API_KEY = "TU_API_KEY_AQUI"; // completá acá
+    const AUTH_TOKEN = "TU_BEARER_AQUI"; // completá acá
+
+    const form = document.getElementById("puntoForm");
+    const msg = document.getElementById("msg");
+
+    function limpiarHTML(value) {
+      return String(value || "").replace(/[<>]/g, "").trim();
+    }
+
+    function setMsg(texto, tipo) {
+      msg.textContent = texto;
+      msg.className = "msg " + (tipo || "");
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      setMsg("", "");
+
+      const nombre = limpiarHTML(form.nombre.value);
+      const texto = limpiarHTML(form.texto.value);
+      const link = limpiarHTML(form.link.value);
+      const color = form.color.value;
+
+      if (!nombre || nombre.length > 30) {
+        setMsg("El nombre es obligatorio y debe tener hasta 30 caracteres.", "error");
+        return;
+      }
+
+      if (!texto || texto.length > 80) {
+        setMsg("El texto es obligatorio y debe tener hasta 80 caracteres.", "error");
+        return;
+      }
+
+      if (link && !link.startsWith("https://")) {
+        setMsg("El link debe empezar con https://", "error");
+        return;
+      }
+
+      const body = { nombre, texto, link, color };
+
+      try {
+        const res = await fetch(SUPABASE_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": API_KEY,
+            "Authorization": "Bearer " + AUTH_TOKEN
+          },
+          body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+          throw new Error("Error " + res.status);
+        }
+
+        setMsg("Listo, ya ocupaste tu lugar", "ok");
+        form.reset();
+        form.color.value = "#000000";
+
+        // Opcional:
+        // setTimeout(() => { window.location.href = "index.html"; }, 1500);
+      } catch (error) {
+        setMsg("No se pudo guardar. Probá de nuevo.", "error");
+      }
+    });
+  </script>
+</body>
+</html>
