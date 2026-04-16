@@ -33,14 +33,38 @@ function obtenerPosicionAleatoria() {
   return { x, y };
 }
 
+function resetPuntoAnimacion(punto, desdeBorde = false) {
+  const ancho = window.innerWidth;
+  const alto = window.innerHeight;
+
+  if (desdeBorde) {
+    const salePorLado = Math.random() > 0.5;
+    if (salePorLado) {
+      punto.x = Math.random() > 0.5 ? -20 : ancho + 20;
+      punto.y = Math.random() * (alto - margenTop - margenBottom) + margenTop;
+    } else {
+      punto.x = Math.random() * (ancho - margenLateral * 2) + margenLateral;
+      punto.y = Math.random() > 0.5 ? margenTop - 20 : alto + 20;
+    }
+  } else {
+    const pos = obtenerPosicionAleatoria();
+    punto.x = pos.x;
+    punto.y = pos.y;
+  }
+
+  punto.z = 0;
+  punto.scale = 1;
+  punto.opacity = 1;
+  punto.entrada = 0;
+  punto.saliendoAtras = false;
+}
+
 function crearPuntosVacios() {
   for (let i = 0; i < TOTAL_PUNTOS; i++) {
     const punto = document.createElement("div");
     punto.className = "punto vacio";
 
     const { x, y } = obtenerPosicionAleatoria();
-    punto.style.left = x + "px";
-    punto.style.top = y + "px";
 
     document.body.appendChild(punto);
 
@@ -52,8 +76,15 @@ function crearPuntosVacios() {
       vy: (Math.random() * 2 - 1) * VELOCIDAD_MAX,
       pausado: false,
       profundidad: Math.random() * (PROFUNDIDAD_MAX - PROFUNDIDAD_MIN) + PROFUNDIDAD_MIN,
-      fase: Math.random() * Math.PI * 2
+      fase: Math.random() * Math.PI * 2,
+      z: 0,
+      scale: 1,
+      opacity: 1,
+      entrada: 0,
+      saliendoAtras: false
     };
+
+    resetPuntoAnimacion(puntoAnimado, false);
 
     punto.addEventListener("mouseenter", () => {
       if (!punto.classList.contains("ocupado")) return;
@@ -69,29 +100,54 @@ function crearPuntosVacios() {
 }
 
 function animarPuntos() {
-  const minX = margenLateral;
-  const maxX = window.innerWidth - margenLateral;
-  const minY = margenTop;
-  const maxY = window.innerHeight - margenBottom;
-  const tiempo = performance.now();
+  const ahora = performance.now();
+  if (!animarPuntos.ultimo) animarPuntos.ultimo = ahora;
+  const delta = Math.min((ahora - animarPuntos.ultimo) / 1000, 0.05);
+  animarPuntos.ultimo = ahora;
+
+  const minX = -28;
+  const maxX = window.innerWidth + 28;
+  const minY = margenTop - 28;
+  const maxY = window.innerHeight + 28;
 
   puntos.forEach((punto) => {
-    if (punto.pausado) return;
+    if (!punto.pausado) {
+      if (punto.saliendoAtras) {
+        punto.z = Math.min(1, punto.z + delta * 0.45);
+        punto.scale = 1 - punto.z * 0.7;     // 1 -> 0.3
+        punto.opacity = 1 - punto.z;         // 1 -> 0
 
-    punto.x += punto.vx * punto.profundidad;
-    punto.y += punto.vy * punto.profundidad;
+        if (punto.opacity <= 0.04) {
+          resetPuntoAnimacion(punto, false);
+        }
+      } else {
+        const factorProfundidad = Math.max(0.35, 1 - punto.z * 0.6);
+        punto.x += punto.vx * delta * 60 * punto.profundidad * factorProfundidad;
+        punto.y += punto.vy * delta * 60 * punto.profundidad * factorProfundidad;
 
-    if (punto.x <= minX || punto.x >= maxX) punto.vx *= -1;
-    if (punto.y <= minY || punto.y >= maxY) punto.vy *= -1;
+        if (Math.random() < 0.0007) {
+          punto.saliendoAtras = true;
+          punto.z = 0;
+        }
 
-    punto.x = Math.min(Math.max(punto.x, minX), maxX);
-    punto.y = Math.min(Math.max(punto.y, minY), maxY);
+        const fueraX = punto.x < minX || punto.x > maxX;
+        const fueraY = punto.y < minY || punto.y > maxY;
+        if (fueraX || fueraY) {
+          resetPuntoAnimacion(punto, true);
+        }
+      }
 
-    const pulsoX = Math.sin(tiempo * 0.0008 + punto.fase) * punto.profundidad * 0.35;
-    const pulsoY = Math.cos(tiempo * 0.0008 + punto.fase) * punto.profundidad * 0.35;
+      punto.entrada = Math.min(1, punto.entrada + delta * 2);
+    }
 
-    punto.el.style.left = (punto.x + pulsoX) + "px";
-    punto.el.style.top = (punto.y + pulsoY) + "px";
+    const easingEntrada = 1 - Math.pow(1 - punto.entrada, 2);
+    const scaleEntrada = 0.6 + easingEntrada * 0.4; // 0.6 -> 1
+    const opacityEntrada = easingEntrada;
+    const scaleFinal = punto.scale * scaleEntrada;
+    const opacityFinal = Math.max(0, Math.min(1, punto.opacity * opacityEntrada));
+
+    punto.el.style.transform = `translate(${punto.x}px, ${punto.y}px) scale(${scaleFinal})`;
+    punto.el.style.opacity = opacityFinal;
   });
 
   requestAnimationFrame(animarPuntos);
@@ -183,15 +239,7 @@ function rotarLote() {
 
   puntos.forEach((punto, index) => {
     const item = lote[index];
-    const salida = Math.random() > 0.5 ? "saliendo-izq" : "saliendo-der";
-    punto.el.classList.add(salida);
-
-    setTimeout(() => {
-      punto.el.classList.remove("saliendo-izq", "saliendo-der");
-      aplicarItemAPunto(punto, item);
-      punto.el.classList.add("entrando");
-      requestAnimationFrame(() => punto.el.classList.remove("entrando"));
-    }, 280);
+    aplicarItemAPunto(punto, item);
   });
 }
 

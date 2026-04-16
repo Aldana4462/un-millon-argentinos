@@ -95,12 +95,13 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+  transition: box-shadow 0.25s ease, filter 0.25s ease;
   user-select: none;
   color: #000;
   font-size: 8px;
   font-weight: 700;
   line-height: 1;
+  will-change: transform, opacity;
 }
 
 /* Variación visual ligera para que no todos se vean iguales */
@@ -118,22 +119,6 @@ body {
   opacity: 0.62;
 }
 
-.punto.saliendo-izq {
-  opacity: 0;
-  transform: translateX(-24px) scale(0.88);
-  filter: blur(0.4px);
-}
-
-.punto.saliendo-der {
-  opacity: 0;
-  transform: translateX(24px) scale(0.88);
-  filter: blur(0.4px);
-}
-
-.punto.entrando {
-  opacity: 0;
-  transform: scale(0.84);
-}
 
 /* vacíos */
 .punto.vacio {
@@ -152,7 +137,7 @@ body {
 }
 
 .punto.ocupado:hover {
-  transform: scale(1.14);
+  filter: brightness(1.15);
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.45), 0 0 14px currentColor;
 }
 
