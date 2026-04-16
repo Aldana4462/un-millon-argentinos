@@ -1,81 +1,248 @@
-const url = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes";
+const url = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes?select=id,nombre,texto,link,color,created_at&order=id.asc";
 const apiKey = "TU_API_KEY_AQUI";
 
-// 👉 cantidad de puntos vacíos
 const TOTAL_PUNTOS = 400;
+let margenTop = 140;
+const margenBottom = 20;
+const margenLateral = 50;
+const VELOCIDAD_MAX = 0.08;
+const REFRESH_MS = 5000;
+const ROTACION_MS = 9000;
+const PROFUNDIDAD_MIN = 0.8;
+const PROFUNDIDAD_MAX = 1.2;
 
-let puntosLibres = [];
+const puntos = [];
+let mensajes = [];
+let offsetLote = 0;
+let popupActual = null;
+let puntoActivo = null;
+let fetchEnCurso = false;
+let ultimoFetchMs = 0;
+let ultimaRotacionMs = 0;
 
-// 1. CREAR PUNTOS VACÍOS
-for (let i = 0; i < TOTAL_PUNTOS; i++) {
-
-  const punto = document.createElement("div");
-  punto.className = "punto vacio";
-
-  let x = Math.random() * window.innerWidth;
-  let y = Math.random() * window.innerHeight;
-
-  punto.style.left = x + "px";
-  punto.style.top = y + "px";
-
-  document.body.appendChild(punto);
-
-  puntosLibres.push(punto);
+function actualizarMargenTop() {
+  const header = document.querySelector(".header");
+  const altoHeader = header ? header.offsetHeight : 120;
+  margenTop = altoHeader + 20;
 }
 
-// 2. TRAER DATOS DE SUPABASE
-fetch(url, {
-  headers: {
-    "apikey": apiKey,
-    "Authorization": "Bearer " + apiKey
+function obtenerPosicionAleatoria() {
+  const anchoUtil = Math.max(window.innerWidth - margenLateral * 2, 1);
+  const altoUtil = Math.max(window.innerHeight - margenTop - margenBottom, 1);
+
+  return {
+    x: Math.random() * anchoUtil + margenLateral,
+    y: Math.random() * altoUtil + margenTop
+  };
+}
+
+function resetPuntoAnimacion(punto, desdeBorde = false) {
+  const ancho = window.innerWidth;
+  const alto = window.innerHeight;
+
+  if (desdeBorde) {
+    if (Math.random() > 0.5) {
+      punto.x = Math.random() > 0.5 ? -20 : ancho + 20;
+      punto.y = Math.random() * (alto - margenTop - margenBottom) + margenTop;
+    } else {
+      punto.x = Math.random() * (ancho - margenLateral * 2) + margenLateral;
+      punto.y = Math.random() > 0.5 ? margenTop - 20 : alto + 20;
+    }
+  } else {
+    const pos = obtenerPosicionAleatoria();
+    punto.x = pos.x;
+    punto.y = pos.y;
   }
-})
-.then(res => res.json())
-.then(data => {
 
-  let popupActual = null;
+  punto.z = 0;
+  punto.scale = 1;
+  punto.opacity = 1;
+  punto.entrada = 0;
+  punto.saliendoAtras = false;
+}
 
-  data.forEach((item, index) => {
+function crearPuntosVacios() {
+  for (let i = 0; i < TOTAL_PUNTOS; i++) {
+    const punto = document.createElement("div");
+    punto.className = "punto vacio";
 
-    setTimeout(() => {
+    document.body.appendChild(punto);
 
-      // agarrar un punto libre
-      const punto = puntosLibres[index];
-      if (!punto) return;
+    const { x, y } = obtenerPosicionAleatoria();
 
-      // convertirlo en ocupado
-      punto.classList.remove("vacio");
-      punto.classList.add("ocupado");
+    const puntoAnimado = {
+      el: punto,
+      x,
+      y,
+      vx: (Math.random() * 2 - 1) * VELOCIDAD_MAX,
+      vy: (Math.random() * 2 - 1) * VELOCIDAD_MAX,
+      pausado: false,
+      profundidad: Math.random() * (PROFUNDIDAD_MAX - PROFUNDIDAD_MIN) + PROFUNDIDAD_MIN,
+      z: 0,
+      scale: 1,
+      opacity: 1,
+      entrada: 0,
+      saliendoAtras: false
+    };
 
-      punto.style.background = item.color || "#000";
+    resetPuntoAnimacion(puntoAnimado, false);
 
-      // CLICK → mostrar info
-      punto.addEventListener("click", () => {
+    punto.addEventListener("mouseenter", () => {
+      if (!punto.classList.contains("ocupado")) return;
+      puntoAnimado.pausado = true;
+    });
 
-        if (popupActual) popupActual.remove();
+    punto.addEventListener("mouseleave", () => {
+      puntoAnimado.pausado = false;
+    });
 
-        const popup = document.createElement("div");
-        popup.className = "popup";
+    puntos.push(puntoAnimado);
+  }
+}
 
-        popup.innerHTML = `
-          ${item.nombre || ""}
-          <br>
-          ${item.texto || ""}
-          <br>
-          ${item.link ? `<a href="${item.link}" target="_blank" style="color:white;">→</a>` : ""}
-        `;
+function animarPuntos() {
+  const ahora = performance.now();
+  if (!animarPuntos.ultimo) animarPuntos.ultimo = ahora;
+  const delta = Math.min((ahora - animarPuntos.ultimo) / 1000, 0.05);
+  animarPuntos.ultimo = ahora;
 
-        popup.style.left = punto.style.left;
-        popup.style.top = punto.style.top;
+  const minX = -28;
+  const maxX = window.innerWidth + 28;
+  const minY = margenTop - 28;
+  const maxY = window.innerHeight + 28;
 
-        document.body.appendChild(popup);
+  puntos.forEach((punto) => {
+    if (!punto.pausado) {
+      if (punto.saliendoAtras) {
+        punto.z += delta * 0.45;
+        punto.scale = 1 - punto.z * 0.7;
+        punto.opacity = 1 - punto.z;
 
-        popupActual = popup;
+        if (punto.opacity <= 0.05) {
+          resetPuntoAnimacion(punto);
+        }
+      } else {
+        punto.x += punto.vx * delta * 60 * punto.profundidad;
+        punto.y += punto.vy * delta * 60 * punto.profundidad;
 
-      });
+        if (Math.random() < 0.0007) {
+          punto.saliendoAtras = true;
+          punto.z = 0;
+        }
 
-    }, index * 50); // aparición progresiva
+        if (punto.x < minX || punto.x > maxX || punto.y < minY || punto.y > maxY) {
+          resetPuntoAnimacion(punto, true);
+        }
+      }
 
+      punto.entrada = Math.min(1, punto.entrada + delta * 2);
+    }
+
+    const easing = 1 - Math.pow(1 - punto.entrada, 2);
+    const scale = punto.scale * (0.6 + easing * 0.4);
+    const opacity = punto.opacity * easing;
+
+    punto.el.style.transform = `translate(${punto.x}px, ${punto.y}px) scale(${scale})`;
+    punto.el.style.opacity = opacity;
   });
 
+  if (!ultimoFetchMs) ultimoFetchMs = ahora;
+  if (!ultimaRotacionMs) ultimaRotacionMs = ahora;
+
+  if (ahora - ultimoFetchMs > REFRESH_MS) {
+    ultimoFetchMs = ahora;
+    cargarMensajes();
+  }
+
+  if (ahora - ultimaRotacionMs > ROTACION_MS) {
+    ultimaRotacionMs = ahora;
+    rotarLote();
+  }
+
+  requestAnimationFrame(animarPuntos);
+}
+
+function mostrarPopup(punto, item) {
+  if (popupActual) popupActual.remove();
+
+  const popup = document.createElement("div");
+  popup.className = "popup";
+
+  popup.innerHTML = `
+    <strong>${item.nombre || ""}</strong><br>
+    ${item.texto || ""}<br>
+    ${item.link ? `<a href="${item.link}" target="_blank">ver link</a>` : ""}
+  `;
+
+  popup.style.left = punto.x + 10 + "px";
+  popup.style.top = punto.y + 10 + "px";
+
+  document.body.appendChild(popup);
+  popupActual = popup;
+}
+
+function normalizarColor(color) {
+  return /^#([0-9A-F]{3}){1,2}$/i.test(color) ? color : "#000";
+}
+
+function aplicarItemAPunto(punto, item) {
+  if (!item) return;
+
+  punto.el.classList.remove("vacio");
+  punto.el.classList.add("ocupado");
+
+  punto.el.style.background = normalizarColor(item.color);
+  punto.el.textContent = `#${item.id}`;
+
+  punto.el.onclick = () => mostrarPopup(punto, item);
+}
+
+function obtenerLoteActual() {
+  return mensajes.slice(offsetLote, offsetLote + TOTAL_PUNTOS);
+}
+
+function sincronizarPuntos(data) {
+  puntos.forEach((punto, i) => {
+    aplicarItemAPunto(punto, data[i]);
+  });
+}
+
+function rotarLote() {
+  if (mensajes.length <= TOTAL_PUNTOS) return;
+
+  offsetLote = (offsetLote + TOTAL_PUNTOS) % mensajes.length;
+  sincronizarPuntos(obtenerLoteActual());
+}
+
+function cargarMensajes() {
+  if (fetchEnCurso) return;
+  fetchEnCurso = true;
+
+  fetch(url, {
+    headers: {
+      apikey: apiKey,
+      Authorization: `Bearer ${apiKey}`
+    }
+  })
+    .then(r => r.json())
+    .then(data => {
+      mensajes = data || [];
+      offsetLote = 0;
+      sincronizarPuntos(obtenerLoteActual());
+    })
+    .catch(console.error)
+    .finally(() => {
+      fetchEnCurso = false;
+    });
+}
+
+actualizarMargenTop();
+crearPuntosVacios();
+animarPuntos();
+cargarMensajes();
+
+window.addEventListener("resize", actualizarMargenTop);
+
+document.addEventListener("click", () => {
+  if (popupActual) popupActual.remove();
 });
