@@ -32,13 +32,25 @@ function crearPuntosVacios() {
 
     document.body.appendChild(punto);
 
-    puntos.push({
+    const puntoAnimado = {
       el: punto,
       x,
       y,
       vx: (Math.random() * 2 - 1) * VELOCIDAD_MAX,
-      vy: (Math.random() * 2 - 1) * VELOCIDAD_MAX
+      vy: (Math.random() * 2 - 1) * VELOCIDAD_MAX,
+      pausado: false
+    };
+
+    punto.addEventListener("mouseenter", () => {
+      if (!punto.classList.contains("ocupado")) return;
+      puntoAnimado.pausado = true;
     });
+
+    punto.addEventListener("mouseleave", () => {
+      puntoAnimado.pausado = false;
+    });
+
+    puntos.push(puntoAnimado);
   }
 }
 
@@ -49,6 +61,8 @@ function animarPuntos() {
   const maxY = window.innerHeight - margenBottom;
 
   puntos.forEach((punto) => {
+    if (punto.pausado) return;
+
     punto.x += punto.vx;
     punto.y += punto.vy;
 
