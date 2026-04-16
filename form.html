@@ -68,6 +68,13 @@
       line-height: 1.35;
     }
 
+    .contador {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #666;
+      text-align: right;
+    }
+
     button {
       border: 0;
       background: #000;
@@ -101,6 +108,7 @@
       <div>
         <label for="texto">Texto</label>
         <textarea id="texto" name="texto" maxlength="300" required></textarea>
+        <div id="contadorTexto" class="contador">0 / 300 caracteres</div>
       </div>
 
       <div>
@@ -126,6 +134,7 @@
 
     const form = document.getElementById("puntoForm");
     const textoInput = document.getElementById("texto");
+    const contadorTexto = document.getElementById("contadorTexto");
     const msg = document.getElementById("msg");
 
     function limpiarHTML(value) {
@@ -142,8 +151,16 @@
       textoInput.style.height = textoInput.scrollHeight + "px";
     }
 
-    textoInput.addEventListener("input", ajustarAltoTextarea);
+    function actualizarContador() {
+      contadorTexto.textContent = textoInput.value.length + " / 300 caracteres";
+    }
+
+    textoInput.addEventListener("input", () => {
+      ajustarAltoTextarea();
+      actualizarContador();
+    });
     ajustarAltoTextarea();
+    actualizarContador();
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -191,6 +208,7 @@
         form.reset();
         form.color.value = "#000000";
         ajustarAltoTextarea();
+        actualizarContador();
 
         // Opcional:
         // setTimeout(() => { window.location.href = "index.html"; }, 1500);
