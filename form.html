@@ -91,7 +91,7 @@
 
       <div>
         <label for="texto">Texto</label>
-        <input id="texto" name="texto" type="text" maxlength="80" required>
+        <input id="texto" name="texto" type="text" maxlength="300" required>
       </div>
 
       <div>
@@ -141,8 +141,8 @@
         return;
       }
 
-      if (!texto || texto.length > 80) {
-        setMsg("El texto es obligatorio y debe tener hasta 80 caracteres.", "error");
+      if (!texto || texto.length > 300) {
+        setMsg("El texto es obligatorio y debe tener hasta 300 caracteres.", "error");
         return;
       }
 
