@@ -55,11 +55,18 @@ body {
 .punto {
   position: absolute;
   z-index: 1;
-  width: 6px;
-  height: 6px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   transition: transform 0.2s;
   user-select: none;
+  color: #000;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 /* vacíos */

@@ -123,6 +123,7 @@ function sincronizarPuntos(data) {
       punto.el.classList.remove("ocupado");
       punto.el.classList.add("vacio");
       punto.el.style.background = "";
+      punto.el.textContent = "";
       punto.el.onclick = null;
       return;
     }
@@ -130,6 +131,7 @@ function sincronizarPuntos(data) {
     punto.el.classList.remove("vacio");
     punto.el.classList.add("ocupado");
     punto.el.style.background = normalizarColor(item.color);
+    punto.el.textContent = item.id ? String(item.id) : "";
     punto.el.onclick = (event) => {
       event.stopPropagation();
       mostrarPopup(punto, item);
