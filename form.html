@@ -44,19 +44,28 @@
       font-weight: 700;
     }
 
-    input {
+    input,
+    textarea {
       width: 100%;
       border: 1px solid #cfc9bb;
       background: #fff;
       padding: 10px;
       box-sizing: border-box;
       font-size: 14px;
+      font-family: inherit;
     }
 
     input[type="color"] {
       padding: 4px;
       height: 42px;
       cursor: pointer;
+    }
+
+    textarea {
+      min-height: 96px;
+      resize: none;
+      overflow: hidden;
+      line-height: 1.35;
     }
 
     button {
@@ -91,7 +100,7 @@
 
       <div>
         <label for="texto">Texto</label>
-        <input id="texto" name="texto" type="text" maxlength="300" required>
+        <textarea id="texto" name="texto" maxlength="300" required></textarea>
       </div>
 
       <div>
@@ -116,6 +125,7 @@
     const AUTH_TOKEN = API_KEY;
 
     const form = document.getElementById("puntoForm");
+    const textoInput = document.getElementById("texto");
     const msg = document.getElementById("msg");
 
     function limpiarHTML(value) {
@@ -126,6 +136,14 @@
       msg.textContent = texto;
       msg.className = "msg " + (tipo || "");
     }
+
+    function ajustarAltoTextarea() {
+      textoInput.style.height = "auto";
+      textoInput.style.height = textoInput.scrollHeight + "px";
+    }
+
+    textoInput.addEventListener("input", ajustarAltoTextarea);
+    ajustarAltoTextarea();
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -172,6 +190,7 @@
         setMsg("Listo, ya ocupaste tu lugar", "ok");
         form.reset();
         form.color.value = "#000000";
+        ajustarAltoTextarea();
 
         // Opcional:
         // setTimeout(() => { window.location.href = "index.html"; }, 1500);
