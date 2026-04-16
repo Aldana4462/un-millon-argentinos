@@ -1,5 +1,5 @@
 const url = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes?select=id,nombre,texto,link,color,created_at&order=id.asc";
-const apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlybXpwZGJzenJvaXVoeWljbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMTc4OTUsImV4cCI6MjA5MTc5Mzg5NX0.XC4iOw3VhVHYiUtLEXGYVbKBtWzslfHSZaaaCvB3D88";
+const apiKey = "TU_API_KEY_AQUI";
 
 const TOTAL_PUNTOS = 400;
 let margenTop = 140;
@@ -27,10 +27,10 @@ function obtenerPosicionAleatoria() {
   const anchoUtil = Math.max(window.innerWidth - margenLateral * 2, 1);
   const altoUtil = Math.max(window.innerHeight - margenTop - margenBottom, 1);
 
-  let x = Math.random() * anchoUtil + margenLateral;
-  let y = Math.random() * altoUtil + margenTop;
-
-  return { x, y };
+  return {
+    x: Math.random() * anchoUtil + margenLateral,
+    y: Math.random() * altoUtil + margenTop
+  };
 }
 
 function resetPuntoAnimacion(punto, desdeBorde = false) {
@@ -38,8 +38,7 @@ function resetPuntoAnimacion(punto, desdeBorde = false) {
   const alto = window.innerHeight;
 
   if (desdeBorde) {
-    const salePorLado = Math.random() > 0.5;
-    if (salePorLado) {
+    if (Math.random() > 0.5) {
       punto.x = Math.random() > 0.5 ? -20 : ancho + 20;
       punto.y = Math.random() * (alto - margenTop - margenBottom) + margenTop;
     } else {
@@ -64,9 +63,9 @@ function crearPuntosVacios() {
     const punto = document.createElement("div");
     punto.className = "punto vacio";
 
-    const { x, y } = obtenerPosicionAleatoria();
-
     document.body.appendChild(punto);
+
+    const { x, y } = obtenerPosicionAleatoria();
 
     const puntoAnimado = {
       el: punto,
@@ -76,7 +75,6 @@ function crearPuntosVacios() {
       vy: (Math.random() * 2 - 1) * VELOCIDAD_MAX,
       pausado: false,
       profundidad: Math.random() * (PROFUNDIDAD_MAX - PROFUNDIDAD_MIN) + PROFUNDIDAD_MIN,
-      fase: Math.random() * Math.PI * 2,
       z: 0,
       scale: 1,
       opacity: 1,
@@ -113,26 +111,23 @@ function animarPuntos() {
   puntos.forEach((punto) => {
     if (!punto.pausado) {
       if (punto.saliendoAtras) {
-        punto.z = Math.min(1, punto.z + delta * 0.45);
-        punto.scale = 1 - punto.z * 0.7;     // 1 -> 0.3
-        punto.opacity = 1 - punto.z;         // 1 -> 0
+        punto.z += delta * 0.45;
+        punto.scale = 1 - punto.z * 0.7;
+        punto.opacity = 1 - punto.z;
 
-        if (punto.opacity <= 0.04) {
-          resetPuntoAnimacion(punto, false);
+        if (punto.opacity <= 0.05) {
+          resetPuntoAnimacion(punto);
         }
       } else {
-        const factorProfundidad = Math.max(0.35, 1 - punto.z * 0.6);
-        punto.x += punto.vx * delta * 60 * punto.profundidad * factorProfundidad;
-        punto.y += punto.vy * delta * 60 * punto.profundidad * factorProfundidad;
+        punto.x += punto.vx * delta * 60 * punto.profundidad;
+        punto.y += punto.vy * delta * 60 * punto.profundidad;
 
         if (Math.random() < 0.0007) {
           punto.saliendoAtras = true;
           punto.z = 0;
         }
 
-        const fueraX = punto.x < minX || punto.x > maxX;
-        const fueraY = punto.y < minY || punto.y > maxY;
-        if (fueraX || fueraY) {
+        if (punto.x < minX || punto.x > maxX || punto.y < minY || punto.y > maxY) {
           resetPuntoAnimacion(punto, true);
         }
       }
@@ -140,14 +135,12 @@ function animarPuntos() {
       punto.entrada = Math.min(1, punto.entrada + delta * 2);
     }
 
-    const easingEntrada = 1 - Math.pow(1 - punto.entrada, 2);
-    const scaleEntrada = 0.6 + easingEntrada * 0.4; // 0.6 -> 1
-    const opacityEntrada = easingEntrada;
-    const scaleFinal = punto.scale * scaleEntrada;
-    const opacityFinal = Math.max(0, Math.min(1, punto.opacity * opacityEntrada));
+    const easing = 1 - Math.pow(1 - punto.entrada, 2);
+    const scale = punto.scale * (0.6 + easing * 0.4);
+    const opacity = punto.opacity * easing;
 
-    punto.el.style.transform = `translate(${punto.x}px, ${punto.y}px) scale(${scaleFinal})`;
-    punto.el.style.opacity = opacityFinal;
+    punto.el.style.transform = `translate(${punto.x}px, ${punto.y}px) scale(${scale})`;
+    punto.el.style.opacity = opacity;
   });
 
   requestAnimationFrame(animarPuntos);
@@ -155,79 +148,46 @@ function animarPuntos() {
 
 function mostrarPopup(punto, item) {
   if (popupActual) popupActual.remove();
-  if (puntoActivo) puntoActivo.pausado = false;
 
   const popup = document.createElement("div");
   popup.className = "popup";
-  const bloques = [];
 
-  if (item.nombre) bloques.push(`<strong>${item.nombre}</strong>`);
-  if (item.texto) bloques.push(`<span>${item.texto}</span>`);
-  if (item.link) bloques.push(`<a href="${item.link}" target="_blank" style="color:white;">ver link</a>`);
-  if (bloques.length === 0) {
-    return;
-  }
+  popup.innerHTML = `
+    <strong>${item.nombre || ""}</strong><br>
+    ${item.texto || ""}<br>
+    ${item.link ? `<a href="${item.link}" target="_blank">ver link</a>` : ""}
+  `;
 
-  popup.innerHTML = bloques.join("<br>");
-  popup.addEventListener("click", (event) => event.stopPropagation());
+  popup.style.left = punto.x + 10 + "px";
+  popup.style.top = punto.y + 10 + "px";
 
-  popup.style.left = (punto.x + 10) + "px";
-  popup.style.top = (punto.y + 10) + "px";
   document.body.appendChild(popup);
   popupActual = popup;
-  puntoActivo = punto;
-  puntoActivo.pausado = true;
 }
 
 function normalizarColor(color) {
-  if (typeof color !== "string") return "#000000";
-
-  const valor = color.trim();
-  const esHexValido = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(valor);
-
-  return esHexValido ? valor : "#000000";
-}
-
-function limpiarPunto(punto) {
-  punto.el.classList.remove("ocupado");
-  punto.el.classList.add("vacio");
-  punto.el.style.background = "";
-  punto.el.textContent = "";
-  punto.el.onclick = null;
+  return /^#([0-9A-F]{3}){1,2}$/i.test(color) ? color : "#000";
 }
 
 function aplicarItemAPunto(punto, item) {
-  if (!item) {
-    limpiarPunto(punto);
-    return;
-  }
+  if (!item) return;
 
   punto.el.classList.remove("vacio");
   punto.el.classList.add("ocupado");
+
   punto.el.style.background = normalizarColor(item.color);
-  punto.el.textContent = item.id ? String(item.id) : "";
-  punto.el.onclick = (event) => {
-    event.stopPropagation();
-    mostrarPopup(punto, item);
-  };
+  punto.el.textContent = `#${item.id}`;
+
+  punto.el.onclick = () => mostrarPopup(punto, item);
 }
 
 function obtenerLoteActual() {
-  if (mensajes.length === 0) return [];
-
-  const lote = [];
-  for (let i = 0; i < TOTAL_PUNTOS; i++) {
-    const index = (offsetLote + i) % mensajes.length;
-    lote.push(mensajes[index]);
-    if (mensajes.length < TOTAL_PUNTOS && i >= mensajes.length - 1) break;
-  }
-  return lote;
+  return mensajes.slice(offsetLote, offsetLote + TOTAL_PUNTOS);
 }
 
 function sincronizarPuntos(data) {
-  puntos.forEach((punto, index) => {
-    const item = data[index];
-    aplicarItemAPunto(punto, item);
+  puntos.forEach((punto, i) => {
+    aplicarItemAPunto(punto, data[i]);
   });
 }
 
@@ -235,34 +195,15 @@ function rotarLote() {
   if (mensajes.length <= TOTAL_PUNTOS) return;
 
   offsetLote = (offsetLote + TOTAL_PUNTOS) % mensajes.length;
-  const lote = obtenerLoteActual();
-
-  puntos.forEach((punto, index) => {
-    const item = lote[index];
-    aplicarItemAPunto(punto, item);
-  });
+  sincronizarPuntos(obtenerLoteActual());
 }
 
 function cargarMensajes() {
   fetch(url, {
     headers: {
-      "apikey": apiKey,
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-      "Authorization": "Bearer " + apiKey
+      apikey: apiKey,
+      Authorization: `Bearer ${apiKey}`
     }
-  })
-  .then(res => {
-    if (!res.ok) {
-      throw new Error("Supabase respondió " + res.status + " " + res.statusText);
-    }
-
-    return res.json();
-  })
-  .then(data => {
-    mensajes = Array.isArray(data) ? data : [];
-    if (offsetLote >= mensajes.length) offsetLote = 0;
-    sincronizarPuntos(obtenerLoteActual());
   })
   .catch(error => {
     console.error("Error cargando mensajes:", error.message);
@@ -283,10 +224,4 @@ window.addEventListener("resize", actualizarMargenTop);
 
 document.addEventListener("click", () => {
   if (popupActual) popupActual.remove();
-  popupActual = null;
-
-  if (puntoActivo) {
-    puntoActivo.pausado = false;
-    puntoActivo = null;
-  }
 });
