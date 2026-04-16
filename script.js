@@ -84,6 +84,15 @@ function mostrarPopup(punto, item) {
   popupActual = popup;
 }
 
+function normalizarColor(color) {
+  if (typeof color !== "string") return "#000000";
+
+  const valor = color.trim();
+  const esHexValido = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(valor);
+
+  return esHexValido ? valor : "#000000";
+}
+
 function sincronizarPuntos(data) {
   puntos.forEach((punto, index) => {
     const item = data[index];
@@ -98,7 +107,7 @@ function sincronizarPuntos(data) {
 
     punto.el.classList.remove("vacio");
     punto.el.classList.add("ocupado");
-    punto.el.style.background = item.color || "#000";
+    punto.el.style.background = normalizarColor(item.color);
     punto.el.onclick = () => mostrarPopup(punto, item);
   });
 }
