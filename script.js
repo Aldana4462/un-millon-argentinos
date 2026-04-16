@@ -2,7 +2,7 @@ const url = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes?select=id
 const apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlybXpwZGJzenJvaXVoeWljbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMTc4OTUsImV4cCI6MjA5MTc5Mzg5NX0.XC4iOw3VhVHYiUtLEXGYVbKBtWzslfHSZaaaCvB3D88";
 
 const TOTAL_PUNTOS = 400;
-const margenTop = 150;
+let margenTop = 140;
 const margenBottom = 100;
 const margenLateral = 50;
 const VELOCIDAD_MAX = 0.35;
@@ -11,6 +11,12 @@ const REFRESH_MS = 5000;
 const puntos = [];
 let popupActual = null;
 let puntoActivo = null;
+
+function actualizarMargenTop() {
+  const header = document.querySelector(".header");
+  const altoHeader = header ? header.offsetHeight : 120;
+  margenTop = altoHeader + 20;
+}
 
 function obtenerPosicionAleatoria() {
   const anchoUtil = Math.max(window.innerWidth - margenLateral * 2, 1);
@@ -162,10 +168,13 @@ function cargarMensajes() {
   });
 }
 
+actualizarMargenTop();
 crearPuntosVacios();
 animarPuntos();
 cargarMensajes();
 setInterval(cargarMensajes, REFRESH_MS);
+
+window.addEventListener("resize", actualizarMargenTop);
 
 document.addEventListener("click", () => {
   if (popupActual) popupActual.remove();
