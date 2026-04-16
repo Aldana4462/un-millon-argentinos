@@ -7,10 +7,13 @@ const margenBottom = 20;
 const margenLateral = 50;
 const VELOCIDAD_MAX = 0.08;
 const REFRESH_MS = 5000;
+const ROTACION_MS = 9000;
 const PROFUNDIDAD_MIN = 0.8;
 const PROFUNDIDAD_MAX = 1.2;
 
 const puntos = [];
+let mensajes = [];
+let offsetLote = 0;
 let popupActual = null;
 let puntoActivo = null;
 
@@ -185,36 +188,58 @@ function normalizarColor(color) {
   return esHexValido ? valor : "#000000";
 }
 
+function limpiarPunto(punto) {
+  punto.el.classList.remove("ocupado");
+  punto.el.classList.add("vacio");
+  punto.el.style.background = "";
+  punto.el.textContent = "";
+  punto.el.onclick = null;
+}
+
+function aplicarItemAPunto(punto, item) {
+  if (!item) {
+    limpiarPunto(punto);
+    return;
+  }
+
+  punto.el.classList.remove("vacio");
+  punto.el.classList.add("ocupado");
+  punto.el.style.background = normalizarColor(item.color);
+  punto.el.textContent = item.id ? String(item.id) : "";
+  punto.el.onclick = (event) => {
+    event.stopPropagation();
+    mostrarPopup(punto, item);
+  };
+}
+
+function obtenerLoteActual() {
+  if (mensajes.length === 0) return [];
+
+  const lote = [];
+  for (let i = 0; i < TOTAL_PUNTOS; i++) {
+    const index = (offsetLote + i) % mensajes.length;
+    lote.push(mensajes[index]);
+    if (mensajes.length < TOTAL_PUNTOS && i >= mensajes.length - 1) break;
+  }
+  return lote;
+}
+
 function sincronizarPuntos(data) {
   puntos.forEach((punto, index) => {
     const item = data[index];
+    aplicarItemAPunto(punto, item);
+  });
+}
 
-    if (!item) {
-      punto.el.classList.remove("ocupado");
-      punto.el.classList.add("vacio");
-      punto.el.style.background = "";
-      punto.el.textContent = "";
-      punto.el.onclick = null;
-      return;
-    }
+function rotarLote() {
+  if (mensajes.length <= TOTAL_PUNTOS) return;
 
-<<<<<<< HEAD
   offsetLote = (offsetLote + TOTAL_PUNTOS) % mensajes.length;
   const lote = obtenerLoteActual();
 
   puntos.forEach((punto, index) => {
     const item = lote[index];
     aplicarItemAPunto(punto, item);
-=======
-    punto.el.classList.remove("vacio");
-    punto.el.classList.add("ocupado");
-    punto.el.style.background = normalizarColor(item.color);
-    punto.el.textContent = item.id ? String(item.id) : "";
-    punto.el.onclick = (event) => {
-      event.stopPropagation();
-      mostrarPopup(punto, item);
-    };
->>>>>>> parent of 0fe733a (Rota lotes de 400 puntos con transicion de salida/entrada)
   });
 }
 
@@ -234,9 +259,15 @@ function cargarMensajes() {
 
     return res.json();
   })
-  .then(data => sincronizarPuntos(Array.isArray(data) ? data : []))
+  .then(data => {
+    mensajes = Array.isArray(data) ? data : [];
+    if (offsetLote >= mensajes.length) offsetLote = 0;
+    sincronizarPuntos(obtenerLoteActual());
+  })
   .catch(error => {
     console.error("Error cargando mensajes:", error.message);
+    mensajes = [];
+    offsetLote = 0;
     sincronizarPuntos([]);
   });
 }
@@ -246,6 +277,7 @@ crearPuntosVacios();
 animarPuntos();
 cargarMensajes();
 setInterval(cargarMensajes, REFRESH_MS);
+setInterval(rotarLote, ROTACION_MS);
 
 window.addEventListener("resize", actualizarMargenTop);
 
