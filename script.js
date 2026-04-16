@@ -10,6 +10,7 @@ const REFRESH_MS = 5000;
 
 const puntos = [];
 let popupActual = null;
+let puntoActivo = null;
 
 function obtenerPosicionAleatoria() {
   const anchoUtil = Math.max(window.innerWidth - margenLateral * 2, 1);
@@ -81,21 +82,25 @@ function animarPuntos() {
 
 function mostrarPopup(punto, item) {
   if (popupActual) popupActual.remove();
+  if (puntoActivo) puntoActivo.pausado = false;
 
   const popup = document.createElement("div");
   popup.className = "popup";
-  popup.innerHTML = `
-    ${item.nombre || ""}
-    <br>
-    ${item.texto || ""}
-    <br>
-    ${item.link ? `<a href="${item.link}" target="_blank" style="color:white;">→</a>` : ""}
-  `;
+  const bloques = [];
 
-  popup.style.left = punto.el.style.left;
-  popup.style.top = punto.el.style.top;
+  if (item.nombre) bloques.push(`<strong>${item.nombre}</strong>`);
+  if (item.texto) bloques.push(`<span>${item.texto}</span>`);
+  if (item.link) bloques.push(`<a href="${item.link}" target="_blank" style="color:white;">ver link</a>`);
+
+  popup.innerHTML = bloques.join("<br>");
+  popup.addEventListener("click", (event) => event.stopPropagation());
+
+  popup.style.left = (punto.x + 10) + "px";
+  popup.style.top = (punto.y + 10) + "px";
   document.body.appendChild(popup);
   popupActual = popup;
+  puntoActivo = punto;
+  puntoActivo.pausado = true;
 }
 
 function normalizarColor(color) {
@@ -122,7 +127,10 @@ function sincronizarPuntos(data) {
     punto.el.classList.remove("vacio");
     punto.el.classList.add("ocupado");
     punto.el.style.background = normalizarColor(item.color);
-    punto.el.onclick = () => mostrarPopup(punto, item);
+    punto.el.onclick = (event) => {
+      event.stopPropagation();
+      mostrarPopup(punto, item);
+    };
   });
 }
 
@@ -153,3 +161,13 @@ crearPuntosVacios();
 animarPuntos();
 cargarMensajes();
 setInterval(cargarMensajes, REFRESH_MS);
+
+document.addEventListener("click", () => {
+  if (popupActual) popupActual.remove();
+  popupActual = null;
+
+  if (puntoActivo) {
+    puntoActivo.pausado = false;
+    puntoActivo = null;
+  }
+});
