@@ -1,4 +1,4 @@
-const url = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes";
+const url = "https://yrmzpdbszroiuhyicnwo.supabase.co/rest/v1/mensajes?select=id,nombre,texto,link,color,created_at&order=id.asc";
 const apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlybXpwZGJzenJvaXVoeWljbndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMTc4OTUsImV4cCI6MjA5MTc5Mzg5NX0.XC4iOw3VhVHYiUtLEXGYVbKBtWzslfHSZaaaCvB3D88";
 
 const TOTAL_PUNTOS = 400;
@@ -107,11 +107,23 @@ function cargarMensajes() {
   fetch(url, {
     headers: {
       "apikey": apiKey,
+      "Content-Type": "application/json",
+      "Accept": "application/json",
       "Authorization": "Bearer " + apiKey
     }
   })
-  .then(res => res.json())
-  .then(data => sincronizarPuntos(data));
+  .then(res => {
+    if (!res.ok) {
+      throw new Error("Supabase respondió " + res.status + " " + res.statusText);
+    }
+
+    return res.json();
+  })
+  .then(data => sincronizarPuntos(Array.isArray(data) ? data : []))
+  .catch(error => {
+    console.error("Error cargando mensajes:", error.message);
+    sincronizarPuntos([]);
+  });
 }
 
 crearPuntosVacios();
